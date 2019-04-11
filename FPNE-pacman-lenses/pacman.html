@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Alex Kavanagh">
+  <meta name="dcterms.date" content="2019-04-09">
+  <title>Using Lenses to implement a Text based Pacman Game</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="reveal.js/css/reveal.css">
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; position: absolute; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; }
+pre.numberSource a.sourceLine:empty
+  { position: absolute; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: absolute; left: -5em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="reveal.js/css/theme/solarized.css" id="theme">
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? 'reveal.js/css/print/pdf.css' : 'reveal.js/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+  <style type="text/css">
+   .reveal h1 { font-size: 2.0em; }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide">
+  <h1 class="title">Using Lenses to implement a Text based Pacman Game</h1>
+  <p class="author">Alex Kavanagh</p>
+  <p class="date">2019-04-09</p>
+</section>
+
+<section id="introduction" class="slide level1">
+<h1>Introduction</h1>
+<div>
+<ul>
+<li class="fragment">Why Haskell?</li>
+<li class="fragment">Why Pac-man?</li>
+<li class="fragment">Why Lenses?</li>
+</ul>
+</div>
+<aside class="notes">
+<ul>
+<li>Why haskell? Because I’ve been interested in learning it for a long, long, time. Writing a Game seemed like an interesting thing to do. Also, it was one of the topics for a previous FPNE!</li>
+<li>Why Pacman? See above!</li>
+<li>I’d been interested in then, and didn’t really understand them. Thus, they were a perfect learning opportunity.</li>
+</ul>
+</aside>
+</section>
+<section id="what-are-we-covering" class="slide level1">
+<h1>What are we covering?</h1>
+<div>
+<ul>
+<li class="fragment">Pac-man demo</li>
+<li class="fragment">What are Lenses?</li>
+<li class="fragment">Examples of their use</li>
+<li class="fragment">Digging a bit deeper</li>
+<li class="fragment">An operator for every ocasion</li>
+<li class="fragment">(if there’s time) The beginnings of how they work.</li>
+</ul>
+</div>
+</section>
+<section id="pac-man-demo" class="slide level1">
+<h1>Pac-man Demo</h1>
+<p>(switch to another window …) - ref: [2]</p>
+</section>
+<section id="what-are-lenses" class="slide level1">
+<h1>What are Lenses?</h1>
+<div>
+<ul>
+<li class="fragment">“Lenses are composable functional references” [1]</li>
+<li class="fragment">They allow you to access and modify data potentially very deep within a structure.</li>
+<li class="fragment">They “sort of” allow object orientated access!</li>
+</ul>
+</div>
+</section>
+<section id="view-." class="slide level1">
+<h1>view (^.)</h1>
+<p>Accessing structures:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb1-1" data-line-number="1">view _1 (<span class="st">&quot;Hello&quot;</span>,<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="st">&quot;Hello&quot;</span></a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb1-4" data-line-number="4">(<span class="st">&quot;hello&quot;</span>, <span class="dv">3</span>) <span class="fu">^.</span> _2</a>
+<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="dv">3</span></a></code></pre></div>
+</section>
+<section id="composing-view" class="slide level1">
+<h1>Composing View</h1>
+<p>Digging deeper:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb2-1" data-line-number="1"></a>
+<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="co">-- Just the prelude (.) operator</span></a>
+<a class="sourceLine" id="cb2-3" data-line-number="3"><span class="ot">(.) ::</span> <span class="dt">Lens&#39;</span> a b <span class="ot">-&gt;</span> <span class="dt">Lens&#39;</span> b c <span class="ot">-&gt;</span> <span class="dt">Lens&#39;</span> a c</a>
+<a class="sourceLine" id="cb2-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb2-5" data-line-number="5">view (_2<span class="fu">.</span>_1) (<span class="st">&quot;Hello&quot;</span>,(<span class="st">&quot;There&quot;</span>,<span class="st">&quot;I was&quot;</span>))</a>
+<a class="sourceLine" id="cb2-6" data-line-number="6"><span class="st">&quot;There&quot;</span></a>
+<a class="sourceLine" id="cb2-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb2-8" data-line-number="8"><span class="co">-- and</span></a>
+<a class="sourceLine" id="cb2-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb2-10" data-line-number="10">(<span class="st">&quot;Hello&quot;</span>,(<span class="st">&quot;There&quot;</span>,<span class="st">&quot;I go&quot;</span>)) <span class="fu">^.</span> (_2<span class="fu">.</span>_2)</a>
+<a class="sourceLine" id="cb2-11" data-line-number="11"><span class="st">&quot;I go&quot;</span></a></code></pre></div>
+</section>
+<section id="set-." class="slide level1">
+<h1>set (.~)</h1>
+<div class="sourceCode" id="cb3"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb3-1" data-line-number="1">set _1 <span class="st">&quot;Goodbye&quot;</span> (<span class="st">&quot;Hello&quot;</span>,<span class="st">&quot;You&quot;</span>)</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">(<span class="st">&quot;Goodbye&quot;</span>,<span class="st">&quot;You&quot;</span>)</a>
+<a class="sourceLine" id="cb3-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb3-4" data-line-number="4"><span class="co">-- and</span></a>
+<a class="sourceLine" id="cb3-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb3-6" data-line-number="6">(<span class="st">&quot;Hello&quot;</span>,<span class="st">&quot;You&quot;</span>) <span class="fu">&amp;</span> _1 <span class="fu">.~</span> <span class="st">&quot;Goodbye&quot;</span></a>
+<a class="sourceLine" id="cb3-7" data-line-number="7">(<span class="st">&quot;Goodbye&quot;</span>,<span class="st">&quot;You&quot;</span>)</a>
+<a class="sourceLine" id="cb3-8" data-line-number="8"></a>
+<a class="sourceLine" id="cb3-9" data-line-number="9"><span class="co">-- and also</span></a>
+<a class="sourceLine" id="cb3-10" data-line-number="10"></a>
+<a class="sourceLine" id="cb3-11" data-line-number="11">(<span class="st">&quot;Hello&quot;</span>,<span class="st">&quot;there&quot;</span>) <span class="fu">&amp;</span> _1 <span class="fu">.~</span> <span class="dv">10</span></a>
+<a class="sourceLine" id="cb3-12" data-line-number="12">                  <span class="fu">&amp;</span> _2 <span class="fu">.~</span> <span class="dv">4</span></a>
+<a class="sourceLine" id="cb3-13" data-line-number="13">(<span class="dv">10</span>,<span class="dv">4</span>)</a></code></pre></div>
+</section>
+<section id="quickly-exploring-the-component-parts" class="slide level1">
+<h1>Quickly exploring the component parts</h1>
+<div class="sourceCode" id="cb4"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb4-1" data-line-number="1">   view       _1     (<span class="st">&quot;Hello&quot;</span>,<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2"><span class="co">-- &lt;operator&gt; &lt;lens&gt; &lt;structure&gt;</span></a>
+<a class="sourceLine" id="cb4-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb4-4" data-line-number="4">   (<span class="st">&quot;Hello&quot;</span>,<span class="dv">1</span>)   <span class="fu">^.</span>        _1</a>
+<a class="sourceLine" id="cb4-5" data-line-number="5"><span class="co">-- &lt;structure&gt; &lt;operator&gt; &lt;lens&gt;</span></a>
+<a class="sourceLine" id="cb4-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb4-7" data-line-number="7">   set        _1     <span class="st">&quot;Goodbye&quot;</span> (<span class="dv">1</span>,<span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb4-8" data-line-number="8"><span class="co">-- &lt;operator&gt; &lt;lens&gt; &lt;item&gt;    &lt;structure&gt;</span></a>
+<a class="sourceLine" id="cb4-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb4-10" data-line-number="10">   (<span class="dv">1</span>,<span class="dv">2</span>)            <span class="fu">&amp;</span>         _1      <span class="fu">.~</span>        <span class="dv">3</span></a>
+<a class="sourceLine" id="cb4-11" data-line-number="11"><span class="co">-- &lt;structure&gt; &lt;flipped ($)&gt; &lt;lens&gt; &lt;operator&gt; &lt;item&gt;</span></a></code></pre></div>
+</section>
+<section id="examples-from-pac-man" class="slide level1">
+<h1>Examples from Pac-man</h1>
+<p>Making a Lens</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw">data</span> <span class="dt">Game</span> <span class="fu">=</span> <span class="dt">Game</span></a>
+<a class="sourceLine" id="cb5-2" data-line-number="2">  {<span class="ot"> _pacman          ::</span> <span class="dt">PacmanData</span></a>
+<a class="sourceLine" id="cb5-3" data-line-number="3">  ,<span class="ot"> _ghosts          ::</span> [<span class="dt">GhostData</span>]</a>
+<a class="sourceLine" id="cb5-4" data-line-number="4">  ,<span class="ot"> _ghostsMode       ::</span> <span class="dt">GhostsMode</span></a>
+<a class="sourceLine" id="cb5-5" data-line-number="5">  ,<span class="ot"> _ghostsModes      ::</span> [<span class="dt">GhostsMode</span>]</a>
+<a class="sourceLine" id="cb5-6" data-line-number="6">  ,<span class="ot"> _maze            ::</span> <span class="dt">Maze</span></a>
+<a class="sourceLine" id="cb5-7" data-line-number="7">  ,<span class="ot"> _mazeHeight      ::</span> <span class="dt">Int</span></a>
+<a class="sourceLine" id="cb5-8" data-line-number="8">  ,<span class="ot"> _mazeWidth       ::</span> <span class="dt">Int</span></a>
+<a class="sourceLine" id="cb5-9" data-line-number="9">  <span class="co">-- etc</span></a>
+<a class="sourceLine" id="cb5-10" data-line-number="10">  } <span class="kw">deriving</span> (<span class="dt">Show</span>)</a>
+<a class="sourceLine" id="cb5-11" data-line-number="11"></a>
+<a class="sourceLine" id="cb5-12" data-line-number="12">makeLenses <span class="ch">&#39;&#39;</span><span class="dt">Game</span></a></code></pre></div>
+</section>
+<section class="slide level1">
+
+<div class="sourceCode" id="cb6"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="kw">data</span> <span class="dt">GhostData</span> <span class="fu">=</span> <span class="dt">GhostData</span></a>
+<a class="sourceLine" id="cb6-2" data-line-number="2">  {<span class="ot"> _ghostAt         ::</span> <span class="dt">Coord</span></a>
+<a class="sourceLine" id="cb6-3" data-line-number="3">  ,<span class="ot"> _ghostDir        ::</span> <span class="dt">Direction</span></a>
+<a class="sourceLine" id="cb6-4" data-line-number="4">  ,<span class="ot"> _ghostState      ::</span> <span class="dt">GhostState</span></a>
+<a class="sourceLine" id="cb6-5" data-line-number="5">  ,<span class="ot"> _ghostName       ::</span> <span class="dt">GhostPersonality</span></a>
+<a class="sourceLine" id="cb6-6" data-line-number="6">  ,<span class="ot"> _ghostTick       ::</span> <span class="dt">Int</span></a>
+<a class="sourceLine" id="cb6-7" data-line-number="7">  ,<span class="ot"> _ghostPillCount  ::</span> <span class="dt">Int</span></a>
+<a class="sourceLine" id="cb6-8" data-line-number="8">  ,<span class="ot"> _ghostRandStdGen ::</span> <span class="dt">StdGen</span></a>
+<a class="sourceLine" id="cb6-9" data-line-number="9">  } <span class="kw">deriving</span> (<span class="dt">Show</span>)</a>
+<a class="sourceLine" id="cb6-10" data-line-number="10"></a>
+<a class="sourceLine" id="cb6-11" data-line-number="11">makeLenses <span class="ch">&#39;&#39;</span><span class="dt">GhostData</span></a></code></pre></div>
+</section>
+<section class="slide level1">
+
+<div class="sourceCode" id="cb7"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="kw">data</span> <span class="dt">PacmanData</span> <span class="fu">=</span> <span class="dt">PacmanData</span></a>
+<a class="sourceLine" id="cb7-2" data-line-number="2">  {<span class="ot"> _pacAt        ::</span> <span class="dt">Coord</span></a>
+<a class="sourceLine" id="cb7-3" data-line-number="3">  ,<span class="ot"> _pacDir       ::</span> <span class="dt">Direction</span></a>
+<a class="sourceLine" id="cb7-4" data-line-number="4">  ,<span class="ot"> _pacNextDir   ::</span> <span class="dt">Direction</span></a>
+<a class="sourceLine" id="cb7-5" data-line-number="5">  ,<span class="ot"> _pacDead      ::</span> <span class="dt">Bool</span></a>
+<a class="sourceLine" id="cb7-6" data-line-number="6">  ,<span class="ot"> _pacTick      ::</span> <span class="dt">Int</span></a>
+<a class="sourceLine" id="cb7-7" data-line-number="7">  ,<span class="ot"> _pacAnimate   ::</span> <span class="dt">Int</span></a>
+<a class="sourceLine" id="cb7-8" data-line-number="8">  } <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Show</span>)</a>
+<a class="sourceLine" id="cb7-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb7-10" data-line-number="10">makeLenses <span class="ch">&#39;&#39;</span><span class="dt">PacmanData</span></a></code></pre></div>
+</section>
+<section id="using-those-lenses" class="slide level1">
+<h1>Using those lenses</h1>
+<div class="sourceCode" id="cb8"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="co">-- | whilstDyingAction -- keep the display updated for each animate tick</span></a>
+<a class="sourceLine" id="cb8-2" data-line-number="2"><span class="co">-- whilst the pacman is dying.  After a timer is expired (pacAnimate reaches</span></a>
+<a class="sourceLine" id="cb8-3" data-line-number="3"><span class="co">-- some value), then reset the game state for the next life.</span></a>
+<a class="sourceLine" id="cb8-4" data-line-number="4"><span class="ot">whilstDyingAction ::</span> <span class="dt">Game</span> <span class="ot">-&gt;</span> <span class="dt">DrawList</span> <span class="dt">Game</span></a>
+<a class="sourceLine" id="cb8-5" data-line-number="5">whilstDyingAction g</a></code></pre></div>
+</section>
+<section class="slide level1">
+
+<div class="sourceCode" id="cb9"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb9-1" data-line-number="1">  <span class="kw">where</span></a>
+<a class="sourceLine" id="cb9-2" data-line-number="2">      _t <span class="fu">=</span> (g <span class="fu">^.</span> pacman <span class="fu">.</span> pacAnimate) <span class="fu">+</span> <span class="dv">1</span></a>
+<a class="sourceLine" id="cb9-3" data-line-number="3">      remainingLives <span class="fu">=</span> (g <span class="fu">^.</span> livesLeft) <span class="fu">-</span> <span class="dv">1</span></a>
+<a class="sourceLine" id="cb9-4" data-line-number="4">      (ghostsSeed, newStdGen) <span class="fu">=</span> random <span class="fu">$</span> g <span class="fu">^.</span> randStdGen</a></code></pre></div>
+</section>
+<section class="slide level1">
+
+<div class="sourceCode" id="cb10"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="ot">whilstDyingAction ::</span> <span class="dt">Game</span> <span class="ot">-&gt;</span> <span class="dt">DrawList</span> <span class="dt">Game</span></a>
+<a class="sourceLine" id="cb10-2" data-line-number="2">whilstDyingAction g</a>
+<a class="sourceLine" id="cb10-3" data-line-number="3">  <span class="co">-- not dead yet; so keep animating</span></a>
+<a class="sourceLine" id="cb10-4" data-line-number="4">  <span class="fu">|</span> _t <span class="fu">&lt;</span> dyingComplete <span class="fu">=</span> <span class="kw">do</span></a>
+<a class="sourceLine" id="cb10-5" data-line-number="5">      addDrawListItem <span class="fu">$</span> <span class="dt">DrawGridAt</span> <span class="fu">$</span> g <span class="fu">^.</span> pacman <span class="fu">.</span> pacAt</a>
+<a class="sourceLine" id="cb10-6" data-line-number="6">      return <span class="fu">$</span> g <span class="fu">&amp;</span> (pacman <span class="fu">.</span> pacAnimate) <span class="fu">%~</span> succ</a>
+<a class="sourceLine" id="cb10-7" data-line-number="7">                 <span class="fu">&amp;</span> (pacman <span class="fu">.</span> pacTick) <span class="fu">.~</span> choosePacTick g <span class="dt">EatenNothing</span></a></code></pre></div>
+</section>
+<section class="slide level1">
+
+<div class="sourceCode" id="cb11"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb11-1" data-line-number="1">  <span class="co">-- Game over -- the game is done, so just leave it animating the ghosts</span></a>
+<a class="sourceLine" id="cb11-2" data-line-number="2">  <span class="fu">|</span> remainingLives <span class="fu">==</span> <span class="dv">0</span> <span class="fu">=</span> <span class="kw">do</span></a>
+<a class="sourceLine" id="cb11-3" data-line-number="3">      addDrawListItem <span class="dt">DrawEverything</span></a>
+<a class="sourceLine" id="cb11-4" data-line-number="4">      return <span class="fu">$</span> g <span class="fu">&amp;</span> gameState <span class="fu">.~</span> <span class="dt">GameOver</span> gameOverFrames</a></code></pre></div>
+</section>
+<section class="slide level1">
+
+<div class="sourceCode" id="cb12"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb12-1" data-line-number="1">  <span class="co">-- we&#39;ve lost a life, so reset pacman, the ghosts, and enable the global</span></a>
+<a class="sourceLine" id="cb12-2" data-line-number="2">  <span class="co">-- pill count to get ghosts out of the house</span></a>
+<a class="sourceLine" id="cb12-3" data-line-number="3">  <span class="fu">|</span> otherwise <span class="fu">=</span> <span class="kw">do</span></a>
+<a class="sourceLine" id="cb12-4" data-line-number="4">      addDrawListItem <span class="dt">DrawEverything</span></a>
+<a class="sourceLine" id="cb12-5" data-line-number="5">      return <span class="fu">$</span> g <span class="fu">&amp;</span> livesLeft <span class="fu">.~</span> remainingLives</a>
+<a class="sourceLine" id="cb12-6" data-line-number="6">                 <span class="fu">&amp;</span> pacman <span class="fu">.~</span> resetPacman             <span class="co">-- tell pacman where to go</span></a>
+<a class="sourceLine" id="cb12-7" data-line-number="7">                 <span class="fu">&amp;</span> ghosts <span class="fu">.~</span> resetGhosts ghostsSeed  <span class="co">-- put ghosts back in the house</span></a>
+<a class="sourceLine" id="cb12-8" data-line-number="8">                 <span class="fu">&amp;</span> framesSincePill <span class="fu">.~</span> <span class="dv">0</span>              <span class="co">-- reset global frames since pill</span></a>
+<a class="sourceLine" id="cb12-9" data-line-number="9">                 <span class="fu">&amp;</span> globalPillCount <span class="fu">?~</span> <span class="dv">0</span>              <span class="co">-- Set to Just 0, to activate global counter</span></a>
+<a class="sourceLine" id="cb12-10" data-line-number="10">                 <span class="fu">&amp;</span> randStdGen <span class="fu">.~</span> newStdGen</a></code></pre></div>
+</section>
+<section id="operators---1" class="slide level1">
+<h1>Operators - 1</h1>
+<ul>
+<li>Data.Lens.* and Lens.Micro.* has an operator for every ocassion</li>
+<li>e.g. (^..) – infix version of <code>toListof</code></li>
+</ul>
+<div class="sourceCode" id="cb13"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb13-1" data-line-number="1">    <span class="kw">let</span> hws <span class="fu">=</span> g <span class="fu">^..</span> (ghosts <span class="fu">.</span> each <span class="fu">.</span> ghostAt)</a></code></pre></div>
+<ul>
+<li>e.g. (?~) – set something to <code>Just &lt;value&gt;</code></li>
+</ul>
+<div class="sourceCode" id="cb14"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb14-1" data-line-number="1">    g <span class="fu">&amp;</span> globalPillCount <span class="fu">?~</span> <span class="dv">0</span></a></code></pre></div>
+</section>
+<section id="operators---2" class="slide level1">
+<h1>Operators - 2</h1>
+<div>
+<ul>
+<li class="fragment">view, set, map operators</li>
+<li class="fragment">maths, including fractional</li>
+<li class="fragment"><code>MonadState</code> operators</li>
+<li class="fragment">Folds and Tranversals</li>
+</ul>
+</div>
+</section>
+<section id="digging-even-deeper" class="slide level1">
+<h1>Digging even deeper …</h1>
+<p>Types of Setter, Getter and the laws</p>
+</section>
+<section id="references" class="slide level1">
+<h1>References</h1>
+<ul>
+<li>[1] - https://github.com/ekmett/lens/wiki/Overview</li>
+<li>[2] - TUI Pac-man in Haskell: https://github.com/ajkavanagh/pacman</li>
+</ul>
+</section>
+    </div>
+  </div>
+
+  <script src="reveal.js/lib/js/head.min.js"></script>
+  <script src="reveal.js/js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        // Push each slide change to the browser history
+        history: true,
+        // Transition style
+        transition: 'cube', // none/fade/slide/convex/concave/zoom
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+    </body>
+</html>
